@@ -289,6 +289,46 @@
    	    }
 	      }
 
+        @media (max-width: 768px) {
+        .pomak-okvir {
+        width: 180px;
+        gap: 10px;
+        padding: 6px 10px;
+        }
+
+        .pomak-box {
+         height: 24px;
+        }
+
+        .vrijednost {
+        width: 32px;
+        font-size: 12px;
+        }
+
+        .klizac {
+        width: 12px;
+        height: 12px;
+        }
+        }
+
+        @media (max-width: 768px) {
+        .temperaturna-legenda {
+        max-height: 50vh;
+        font-size: 8px;
+        padding: 6px;
+        overflow-y: scroll;
+        }
+
+        .temperaturna-legenda img {
+        width: 16px;
+        height: 8px;
+        }
+
+        .naslov-temperaturne-legende {
+        font-size: 9px;
+        }
+        }
+
         .leaflet-control-attribution {
         left: 10px !important;
         bottom: 10px !important;
@@ -342,12 +382,24 @@
         border-radius: 10px;
         box-shadow: 0 0 8px rgba(0,0,0,0.4);
         color: black;
+        z-index: 3000 !important;
         }
 
         .leaflet-control-layers {
           box-shadow: none !important;
         }
 
+        @media (max-width: 768px) {
+        .leaflet-control.abstractUncollapsed {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: calc(100vw - 20px) !important; 
+        max-width: 400px !important;
+        z-index: 3000 !important;
+        }
+        }
+        
       </style>
 
       <title>Karta ljetnih temperatura tla na području Grada Mostara</title>
