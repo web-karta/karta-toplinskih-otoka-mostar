@@ -476,7 +476,8 @@
       abstract.onAdd = function (map) {
       this._div = L.DomUtil.create('div',
       'leaflet-control abstract');
-      this._div.id = 'abstract'
+      this._div.id = 'abstract';
+      this._div.title = "Prikaži informacije o karti";
       if (!L.Browser.touch) {
       this._div.onmouseenter = abstract.show;
       this._div.onmouseleave = abstract.hide;
