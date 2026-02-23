@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" 
+    content="google23a9c3762fc1cd27">
+    <meta name="keywords" content="karta ljetnih temperatura tla na području Grada Mostara, karta urbanih i zelenih toplinskih otoka na području Grada Mostara, urbani toplinski otoci, temperatura tla, Mostar">
+    <meta name="description" content="Karta ljetnih temperatura tla na području Grada Mostara. Karta toplinskih i zelenih otoka na području Grada Mostara">
+    <title>Karta ljetnih temperatura tla te urbanih i zelenih otoka na području Grada Mostara</title>
+    <link rel="icon" type="image/png" href="Indeks%20kritičnosti%20okoliša%20u%20Gradu%20Mostaru/images/termometar.png">
+    <style>
+        html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        background-color: rgba(247,242,246,1)
+        }
+
+        .okvir {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        gap: 50px;
+        }
+
+        .kartice { 
+        width: 200px;
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(
+        to right, 
+        rgba(44,123,182,1.0), 
+        rgba(212,235,213,1.0), 
+        rgba(255,255,191,1.0), 
+        rgba(253,180,105,1.0), 
+        rgba(217,36,33,1.0)
+        );
+        color: black;
+        font-family: 'PT Serif', serif;
+        font-size: 25px;
+        font-weight: bold;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.5s, background 0.5s;
+        text-align: center;
+        }
+
+        .kartice:hover {
+        transform: scale(1.25);
+        }
+
+        .kartice.desna {
+        background: linear-gradient(
+        to bottom, 
+        rgba(237,74,71,1.0) 50%, 
+        rgba(166,217,106,1.0) 50%
+        );
+        }
+
+		@media (max-width: 768px) {
+		html, body {
+    	overflow: hidden;
+  		}
+    	.okvir {
+        flex-direction: column;
+		justify-content: center;
+        align-items: center;
+		height: 100svh;
+        gap: 50px;
+    	}
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div class="okvir" id="homeScreen">
+    <div class="kartice"
+     onclick="window.location.href='Karta ljetnih temperatura tla u Gradu Mostaru/index.html'">Karta<br>ljetnih<br>temperatura<br>tla
+    </div>
+
+    <div class="kartice desna"
+    onclick="window.location.href='Indeks kritičnosti okoliša u Gradu Mostaru/index.html'">Karta<br>toplinskih<br>i zelenih<br>otoka
+    </div>
+
+</body>
+</html>
