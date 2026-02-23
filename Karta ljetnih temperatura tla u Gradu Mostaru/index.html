@@ -390,17 +390,20 @@
         }
 
         @media (max-width: 768px) {
-        .leaflet-control.abstractUncollapsed {
+       .leaflet-control.abstractUncollapsed {
         position: fixed !important;
         left: 50% !important;
         right: auto !important;
         transform: translateX(-50%) !important;
         width: calc(100vw - 20px) !important; 
-        max-width: 360px !important;
-        line-height: 1.25 !important;
+        width: auto !important;
+        max-width: 240px !important;    
+        line-height: 1.15 !important;
+        font-size: 7px !important;
         z-index: 9000 !important;
         }
         }
+
 
         @media (max-width: 768px) {
         .leaflet-control.abstractUncollapsed strong {
