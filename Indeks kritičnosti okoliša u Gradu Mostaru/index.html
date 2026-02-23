@@ -477,8 +477,10 @@
       this._div = L.DomUtil.create('div',
       'leaflet-control abstract');
       this._div.id = 'abstract'
-      this._div.setAttribute("onmouseenter", "abstract.show()");
-      this._div.setAttribute("onmouseleave", "abstract.hide()");
+      if (!L.Browser.touch) {
+      this._div.onmouseenter = abstract.show;
+      this._div.onmouseleave = abstract.hide;
+      }
       this._div.onclick = function(e){
       e.stopPropagation();
       if (abstract._div.classList.contains("abstractUncollapsed")){
