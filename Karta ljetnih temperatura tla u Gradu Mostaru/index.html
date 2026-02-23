@@ -372,6 +372,7 @@
         }
 
         .leaflet-control.abstractUncollapsed {
+        position:relative;
         background-color: #f8f9fa !important;
         font-family: 'PT Sans', sans-serif;
         font-size: 9pt;
@@ -432,8 +433,8 @@
       .abstract-close{
       display:block;
       position:absolute;
-      top:6px;
-      right:8px;
+      top:15px;
+      right:15px;
       font-size:16px;
       font-weight:700;
       cursor:pointer;
@@ -625,7 +626,7 @@
       abstract.show = function () {
       this._div.classList.remove("abstract");
       this._div.classList.add("abstractUncollapsed");
-      this._div.innerHTML = '<div class="abstract-close" onclick="abstract.hide()">✕</div>'
+      this._div.innerHTML = '<div class="abstract-close" onclick="event.stopPropagation(); abstract.hide()">✕</div>'
       + '<strong class="abstract-title">Karta ljetnih temperatura tla <br> na području Grada Mostara</strong><br>'
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
       + 'Ova web-karta izrađena je u sklopu rada \'\'Određivanje, kartiranje i analiza toplinskih otoka urbanog područja Grada Mostara primjenom satelitskih snimki\'\'.</span>'
