@@ -389,25 +389,34 @@
           box-shadow: none !important;
         }
 
-        @media (max-width: 768px) {
-        .leaflet-control.abstractUncollapsed {
-        position: fixed !important;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(100vw - 20px) !important; 
-        max-width: 360px !important;
-        line-height: 1.25 !important;
-        z-index: 9000 !important;
-        }
-        }
+      @media (max-width: 768px) {
+      .leaflet-control.abstractUncollapsed {
+      position: fixed !important;
+      left: 50% !important;
+      right: auto !important;
+      font-size: 7pt;
+      transform: translateX(-50%) !important;
+      width: calc(100vw - 20px) !important; 
+      max-width: 360px !important;
+      line-height: 1.1 !important;
+      z-index: 9000 !important;
+      }
 
+      .leaflet-control.abstractUncollapsed strong {
+      font-size: 13pt !important;
+      }
+      }
 
-        @media (max-width: 768px) {
-        .leaflet-control.abstractUncollapsed strong {
-        font-size: 13pt !important;
-        }
-        }
+      @media (max-width: 768px){
+      .leaflet-top,
+      .leaflet-right{
+       z-index: 9500 !important;
+      }
+
+      .leaflet-control.abstractUncollapsed{
+      z-index: 99999 !important;
+      } 
+      }
 
       </style>
 
