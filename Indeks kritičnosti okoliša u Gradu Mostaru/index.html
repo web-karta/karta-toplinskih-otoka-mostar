@@ -271,6 +271,13 @@
       box-shadow: none !important;
       }
 
+        .abstract-title{
+        font-size:18pt;
+        font-family:'PT Serif', sans-serif;
+        text-align:center;
+        display:block;
+        }
+
       @media (max-width: 768px) {
       .leaflet-control.abstractUncollapsed {
       position: fixed !important;
@@ -283,16 +290,20 @@
       line-height: 1.1 !important;
       z-index: 9000 !important;
       }
-
-      .leaflet-control.abstractUncollapsed strong:first-of-type{
-      font-size:13pt !important;
-      }
       }
 
       @media (max-width: 768px){
       .leaflet-top,
       .leaflet-right{
        z-index: 9500 !important;
+      }
+
+      .leaflet-control.abstractUncollapsed{
+      margin:0 !important;
+      }
+
+      .abstract-title{
+      font-size:13pt !important;
       }
 
       .leaflet-control.abstractUncollapsed{
@@ -452,7 +463,7 @@
       abstract.show = function () {
       this._div.classList.remove("abstract");
       this._div.classList.add("abstractUncollapsed");
-      this._div.innerHTML = '<strong style="font-size: 18pt; font-family: \'PT Serif\', sans-serif; text-align: center; display: block;">Karta toplinskih i zelenih otoka <br> na području Grada Mostara</strong><br>'
+      this._div.innerHTML = '<strong class="abstract-title">Karta toplinskih i zelenih otoka <br> na području Grada Mostara</strong><br>'
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
       + 'Ova web-karta izrađena je u sklopu rada \'\'Određivanje, kartiranje i analiza toplinskih otoka urbanog područja Grada Mostara primjenom satelitskih snimki\'\'.</span>'
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">' 
