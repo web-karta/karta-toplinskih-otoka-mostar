@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" 
+    content="google23a9c3762fc1cd27">
+    <meta name="keywords" content="karta urbanih i zelenih toplinskih otoka na području Grada Mostara, urbani otoci, urbani toplinski otoci, urbani zeleni otoci, zeleni otoci, temperatura tla, ljetna temperatura, temperature u Mostaru, Mostaru">
+    <meta name="description" content="Karta toplinskih i zelenih otoka na području Grada Mostara">
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" /> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+    <style>
+      html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        }
+
+      .kriticnost-legenda {
+      position: absolute;
+      left: 10px;
+      top: 160px;
+      background: white;
+      border: 1px solid #999;
+      display: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      padding: 10px;
+      z-index: 2000;
+      font-family: 'PT Sans Narrow', sans-serif;
+      font-size: 12.25px;
+      line-height: 1;
+      max-height: 90%;
+      overflow-y: auto;
+      }
+
+      .kriticnost-legenda table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      width: 100%;
+      }
+
+      .kriticnost-legenda img {
+      display: block;
+      width: 20px;
+      height: 10px;
+      margin-right: 6px;
+      padding: 2px;
+      }
+
+      .naslov-legende {
+      font-family: 'PT Sans', sans-serif;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+      font-size: 12.5px;
+      }
+
+      .temp {
+      position: absolute;
+      background-color: #fff !important;
+      border-radius: 4px !important;
+      top: 110px;
+      left: 10px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #000;
+      z-index: 1000;
+      }
+
+      .filter-gumb {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 4px;
+      top: 60px;        
+      left: 10px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: none;           
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #000;
+      z-index: 1000;
+      }
+
+      #filter-panel {
+      position: absolute;
+      top: 11px;                 
+      left: 60px;                
+      background: white;
+      border: 1px solid #999;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      padding: 8px 10px;
+      z-index: 2000;
+      font-family: 'PT Sans Narrow', sans-serif;
+      font-size: 12.25px;
+      line-height: 1;
+      max-height: 90%;
+      overflow-y: auto;
+      display: none;             
+      }
+
+      #filter-panel h4 {
+      margin: 2px 0 4px;
+      font-size: 12.5px;
+      font-family: 'PT Sans', sans-serif;
+      font-weight: 700;
+      text-align: center;
+      }
+
+      #filter-panel .filter-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);  
+      column-gap: 5px;
+      row-gap: 0px;
+      margin-bottom: 0px;
+      }
+
+      #filter-panel label {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 0px;
+      cursor: pointer;
+      }
+
+      .leaflet-control-layers-toggle {
+      width: 35px !important;
+      height: 36px !important;
+      background-size: 26px 26px !important;
+      z-index: 500;
+      background-position: center center;
+      background-repeat: no-repeat;
+      font-family: 'PT Sans', sans-serif !important;
+      background-color: #fff;
+      border: none !important;
+      border-radius: 4px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+      }
+
+      .leaflet-top.leaflet-right .leaflet-control-layers {
+      margin-top: 55px;
+      }
+
+      .leaflet-control-scale {
+      left: 5px !important;
+      font-family: 'PT Sans', sans-serif !important;
+      bottom: 15px !important;
+      }
+
+      #koordinatni-okvir {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: black;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-family: 'PT Sans', sans-serif;
+      font-size: 12px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+      z-index: 1000;
+      width: max-content;
+      white-space: nowrap;
+      }
+
+      #izbor-projekcije {
+      font-family: 'PT Sans', sans-serif;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+      cursor: pointer;
+      background-color: white;
+      box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      width: max-content;
+      }
+
+      #koordinate {
+      font-family: 'PT Sans', monospace;
+      white-space: nowrap;
+      }
+
+	    @media (max-width: 768px) {
+    	#koordinatni-okvir {
+      display: none !important;
+   	  }
+	    }
+
+      .leaflet-control-attribution {
+      left: 10px !important;
+      bottom: 10px !important;
+      right: auto !important;
+      text-align: left !important;
+      display: flex !important;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px !important;
+      background: rgba(255,255,255,0.8) !important;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3) !important;
+      border-radius: 4px !important;
+      font-size: 14px !important;
+      }
+
+      .leaflet-control-attribution img {
+      vertical-align: middle;
+      }
+
+      .leaflet-control.abstract {
+      position: absolute !important;
+      top: 0px !important;
+      right: 3.5px !important;
+      z-index: 2000 !important;
+      width: 37px !important;
+      height: 36px !important;
+      border: none !important;
+      background-color: #f8f9fa !important;
+      background-image: url('images/termometar.png') !important;      
+      background-size: 36px 36px !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      border-radius: 4px !important;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+      font-size: 18px;
+      text-align: center;
+      line-height: 36px;
+      color: transparent !important;
+      cursor: pointer;
+      user-select: none;
+      }
+
+      .leaflet-control.abstractUncollapsed {
+      background-color: #f8f9fa !important;
+      font-family: 'PT Sans', sans-serif;
+      font-size: 9pt;
+      max-width: 400px;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+      color: black;
+      }
+
+      .leaflet-control-layers {
+      box-shadow: none !important;
+      }
+
+    </style>
+
+    <title>Karta toplinskih i zelenih otoka na području Grada Mostara</title>
+    <link rel="icon" type="image/png" href="images/termometar.png"> 
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="kriticnost-legenda" class="kriticnost-legenda">
+      <div class="naslov-legende">Kritičnost okoliša</div>
+      <table>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Voda0.png" /></td><td> Voda</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Nema1.png" /></td><td> Nema (urbani zeleni otok)</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Jakoniska2.png" /></td><td> Jako niska (urbani zeleni otok)</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Niska3.png" /></td><td> Niska</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Umjerenoniska4.png" /></td><td> Umjereno niska</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Umjerena5.png" /></td><td> Umjerena</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Umjerenovisoka6.png" /></td><td> Umjereno visoka</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Visoka7.png" /></td><td> Visoka</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Jakovisoka8.png" /></td><td> Jako visoka</td></tr>
+        <tr><td><img src="legend/Indekskritinostiokolia_1_Ozbiljna9.png" /></td><td> Ozbiljna (urbani toplinski otok)</td></tr>
+      </table>
+    </div>
+
+    <div class="temp" id="tempIcon" title="Prikaži razine kritičnosti okoliša">
+    <i class="fas fa-thermometer-half"></i></div>
+    <div class="filter-gumb" id="filterIcon" title="Odaberi razine kritičnosti okoliša">
+    <i class="fas fa-filter"></i></div>
+    <div id="filter-panel">
+    <h4>Indeks kritičnosti okoliša</h4>
+    <div class="filter-row">
+    <label><input type="checkbox" data-layer="eci2" checked> Nema</label>
+    <label><input type="checkbox" data-layer="eci3" checked> Jako niska</label>
+    <label><input type="checkbox" data-layer="eci4" checked> Niska</label></div>
+    <div class="filter-row">
+    <label><input type="checkbox" data-layer="eci5" checked> Umjereno niska</label>
+    <label><input type="checkbox" data-layer="eci6" checked> Umjerena</label>
+    <label><input type="checkbox" data-layer="eci7" checked> Umjereno visoka</label></div>
+    <div class="filter-row">
+    <label><input type="checkbox" data-layer="eci8" checked> Visoka</label>
+    <label><input type="checkbox" data-layer="eci9" checked> Jako visoka</label>
+    <label><input type="checkbox" data-layer="eci10" checked> Ozbiljna</label></div>
+    <h4 style="margin-top:6px;">Urbani otoci</h4>
+    <div class="filter-row">
+    <label><input type="checkbox" data-layer="otoci0" checked> Ostala područja</label>
+    <label><input type="checkbox" data-layer="otoci1" checked> Urbani zeleni otoci</label>
+    <label><input type="checkbox" data-layer="otoci2" checked> Urbani toplinski otoci</label></div>
+    </div>
+
+    <div id="koordinatni-okvir">
+    <select id="izbor-projekcije">
+    <option value="wgs84">WGS84</option>
+    <option value="dks1901">DKS1901/GK</option>
+    <option value="bh_etrs89">BH_ETRS89/TM</option>        
+    </select>
+    <div id="koordinate">φ: ---, λ: ---</div>
+    </div>
+
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/L.Control.Layers.Tree.min.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+    <script src="data/Urbanitoplinskiizeleniotoci_0.js"></script>
+    <script src="data/Indekskritinostiokolia_1.js"></script>
+
+    <script>
+    
+    var map = L.map('map', {
+    zoomControl:false, maxZoom:19, minZoom:10,
+    attributionControl: false
+    })
+
+    var attribution = L.control.attribution({
+    prefix: false,
+    position: 'bottomleft'
+    }).addTo(map);
+    attribution.addAttribution(
+    '<img src="https://leafletjs.com/docs/images/logo.png" ' +
+    'style="height:22px; cursor:pointer;" ' +
+    'alt="Leaflet logo" ' +
+    'title="Leaflet" ' +
+    'onclick="window.open(\'https://leafletjs.com\', \'_blank\')">'
+    );
+
+    var hash = new L.Hash(map);
+    var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
+    const tempIcon = document.getElementById("tempIcon");
+    tempIcon.addEventListener("click", () => {
+      const legend = document.getElementById("kriticnost-legenda");
+      const icon = tempIcon.querySelector("i");
+    if (legend.style.display === 'none' || legend.style.display === '') {
+      legend.style.display = 'block';
+      icon.style.color = 'red';
+    } else {
+      legend.style.display = 'none';
+      icon.style.color = '#000';
+    }
+    });
+
+    const filterIcon = document.getElementById("filterIcon");
+    filterIcon.addEventListener("click", () => {
+      const panel = document.getElementById("filter-panel");
+      const icon  = filterIcon.querySelector("i");
+    if (panel.style.display === 'none' || panel.style.display === '') {
+      panel.style.display = 'block';
+      icon.style.color    = 'red';
+    } else {
+      panel.style.display = 'none';
+      icon.style.color    = '#000';
+    }
+    });
+
+    map.whenReady(function(){
+      L.control.locate({
+      strings: {
+      title: "Prikaži moju lokaciju",
+      popup: "Nalazite se unutar {distance} m od ovog mjesta.",
+      outsideMapBoundsMsg: "Nalazite se izvan granica karte.",
+      }
+      }).addTo(map);
+    document.getElementById('tempIcon').style.display   = 'flex';
+    document.getElementById('filterIcon').style.display = 'flex';
+    document.getElementById('koordinatni-okvir').style.display = 'flex';
+    });
+
+    L.control.scale(
+      {position: 'bottomleft', 
+      imperial: false, 
+      metric: true
+      })
+      .addTo(map);
+
+    var abstract = new L.Control({'position':'topright'});
+      abstract.onAdd = function (map) {
+      this._div = L.DomUtil.create('div',
+      'leaflet-control abstract');
+      this._div.id = 'abstract'
+      this._div.setAttribute("onmouseenter", "abstract.show()");
+      this._div.setAttribute("onmouseleave", "abstract.hide()");
+      this.hide();
+      return this._div;
+      };
+      abstract.hide = function () {
+      this._div.classList.remove("abstractUncollapsed");
+      this._div.classList.add("abstract");
+      this._div.innerHTML = 'i'
+      }
+      abstract.show = function () {
+      this._div.classList.remove("abstract");
+      this._div.classList.add("abstractUncollapsed");
+      this._div.innerHTML = '<strong style="font-size: 18pt; font-family: \'PT Serif\', sans-serif; text-align: center; display: block;">Karta toplinskih i zelenih otoka <br> na području Grada Mostara</strong><br>'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
+      + 'Ova web-karta izrađena je u sklopu rada \'\'Određivanje, kartiranje i analiza toplinskih otoka urbanog područja Grada Mostara primjenom satelitskih snimki\'\'.</span>'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">' 
+      + 'Karta prikazuje prostorno protezanje urbanih toplinskih i zelenih otoka, kao i područja grada (naselje Mostar i prigradska naselja) s razinama kritičnosti okoliša, od područja s vegetacijom (nema kritičnosti okoliša, urbani zeleni otoci) do područja s visokom izgrađenošću (ozbiljna kritičnost okoliša, urbani toplinski otoci). Prikaz je nastao usrednjavanjem ljetnih indeksa kritičnosti okoliša u razdoblju od 2021. do 2025.'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
+      + '</span><br>'
+      + '<strong style="font-size: 10pt; font-family: \'PT Sans\', sans-serif;">Kartografska projekcija:</strong><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">Web Mercatorova projekcija (EPSG: 3857)</span><br><br />'
+      + '<strong style="font-size: 10pt; font-family: \'PT Sans\', sans-serif;">Mjesto i vrijeme izrade:</strong><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">Zagreb, ožujak 2026.</span><br><br />'
+      + '<strong style="font-size: 10pt; font-family: \'PT Sans\', sans-serif;">Izvornici:</strong><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">- Grad Mostar, Odjel za urbanizam i građenje, Služba za katastar</span><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">- Geološki zavod SAD-a (USGS), Earth Explorer</span><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">- OpenStreetMap, CARTO</span><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">- ESRI World Imagery</span><br><br />'
+      + '<strong style="font-size: 10pt; font-family: \'PT Sans\', sans-serif;">Autor:</strong><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">Josip Alpeza, univ. bacc. ing. geod. et geoinf.</span><br />'
+      + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10pt;">Andrea Marić, univ. bacc. ing. geod. et geoinf.</span><br />';
+      };
+      abstract.addTo(map);
+
+    map.createPane('tilesAbove');
+    map.getPane('tilesAbove').style.zIndex = 650; 
+
+    var ESRI = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+    {
+    maxZoom: 19,
+    pane: 'tilesAbove',
+    opacity: 0.3
+    });
+    var Kartografska_podloga = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    pane: 'tilesAbove',
+    opacity: 0.30
+    });
+    Kartografska_podloga.addTo(map);
+
+    function pop_Urbanitoplinskiizeleniotoci_0(feature, layer) {
+      var popupContent = '<table>\
+      <tr>\
+      <td colspan="2"><strong>Opis</strong><br />' + (feature.properties['Opis'] !== null ? autolinker.link(String(feature.properties['Opis']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+      </tr>\
+      <tr>\
+      <td colspan="2"><strong>Pojašnjenje</strong><br />' + (feature.properties['Objašnjen'] !== null ? autolinker.link(String(feature.properties['Objašnjen']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+      </tr>\
+      </table>';
+      var content = popupContent;
+			layer.bindPopup(content, { maxHeight: 400 });
+      }
+
+    function style_Urbanitoplinskiizeleniotoci_0_0(feature) {
+      const dn = Number(feature.properties.DN);
+      switch (dn) {
+        case 1:
+        return {
+        pane: 'pane_Urbanitoplinskiizeleniotoci_0',
+        color: 'rgba(35,35,35,0.0)',
+        weight: 1,
+        fillOpacity: 1,
+        fillColor: 'rgba(210,210,210,1.0)'
+        };
+      case 2:
+      return {
+      pane: 'pane_Urbanitoplinskiizeleniotoci_0',
+      color: 'rgba(35,35,35,0.0)',
+      weight: 1,
+      fillOpacity: 1,
+      fillColor: 'rgba(26,150,65,1.0)'
+      };
+
+      case 3:
+      return {
+      pane: 'pane_Urbanitoplinskiizeleniotoci_0',
+      color: 'rgba(35,35,35,0.0)',
+      weight: 1,
+      fillOpacity: 1,
+      fillColor: 'rgba(215,25,28,1.0)'
+      };
+      }
+
+  // fallback (VAŽNO)
+  return {
+    pane: 'pane_Urbanitoplinskiizeleniotoci_0',
+    color: 'rgba(0,0,0,0)',
+    fillOpacity: 0
+  };
+}
+      
+    map.createPane('pane_Urbanitoplinskiizeleniotoci_0');
+    map.getPane('pane_Urbanitoplinskiizeleniotoci_0').style.zIndex = 400;
+
+    var layer_Urbanitoplinskiizeleniotoci = new L.geoJson(
+      json_Urbanitoplinskiizeleniotoci_0,
+      {
+      attribution: '',
+      interactive: true,
+      dataVar: 'json_Urbanitoplinskiizeleniotoci_0',
+      pane: 'pane_Urbanitoplinskiizeleniotoci_0',
+      onEachFeature: pop_Urbanitoplinskiizeleniotoci_0,
+      style: style_Urbanitoplinskiizeleniotoci_0_0,
+      smoothFactor: 0
+      });
+
+layer_Urbanitoplinskiizeleniotoci.addTo(map);
+
+    function pop_Indekskritinostiokolia_1(feature, layer) {
+      var popupContent = '<table>\
+      <tr>\
+      <td colspan="2"><strong>Kritičnost okoliša</strong><br />' + (feature.properties['ECI'] !== null ? autolinker.link(String(feature.properties['ECI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+      </tr>\
+      </table>';
+      var content = popupContent;
+			layer.bindPopup(content, { maxHeight: 400 });
+      }
+
+    function style_Indekskritinostiokolia_1_0(feature) {
+      switch(String(feature.properties['DN'])) {
+      case '1':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(208,244,252,1.0)',
+      interactive: true,
+      }
+      break;
+      case '2':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(26,150,65,1.0)',
+      interactive: true,
+      }
+      break;
+      case '3':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(96,184,85,1.0)',
+      interactive: true,
+      }
+      break;
+      case '4':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(166,217,106,1.0)',
+      interactive: true,
+      }
+      break;
+      case '5':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(211,236,149,1.0)',
+      interactive: true,
+      }
+      break;
+      case '6':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(255,255,192,1.0)',
+      interactive: true,
+      }
+      break;
+      case '7':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(254,215,145,1.0)',
+      interactive: true,
+      }
+      break;
+      case '8':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(253,174,97,1.0)',
+      interactive: true,
+      }
+      break;
+      case '9':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(234,99,62,1.0)',
+      interactive: true,
+      }
+      break;
+      case '10':
+      return {
+      pane: 'pane_Indekskritinostiokolia_1',
+      opacity: 1,
+      color: 'rgba(35,35,35,0.0)',
+      dashArray: '',
+      lineCap: 'butt',
+      lineJoin: 'miter',
+      weight: 1.0, 
+      fill: true,
+      fillOpacity: 1,
+      fillColor: 'rgba(215,25,28,1.0)',
+      interactive: true,
+      }
+      break;
+      }
+      }
+
+    map.createPane('pane_Indekskritinostiokolia_1');
+    map.getPane('pane_Indekskritinostiokolia_1').style.zIndex = 401;
+
+    var layer_Indekskritinostiokolia_01 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 1,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_02 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 2,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+    
+    var layer_Indekskritinostiokolia_03 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 3,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+    
+    var layer_Indekskritinostiokolia_04 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 4,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+	    smoothFactor: 0
+      });
+    
+    var layer_Indekskritinostiokolia_05 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 5,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_06 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 6,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+    
+    var layer_Indekskritinostiokolia_07 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 7,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_08 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+      filter: f => f.properties.DN == 8,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_09 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 9,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_10 = new L.geoJson(json_Indekskritinostiokolia_1, {
+      attribution: '',
+	    filter: f => f.properties.DN == 10,
+      interactive: true,
+      dataVar: 'json_Indekskritinostiokolia_1',
+      layerName: 'layer_Indekskritinostiokolia_1',
+      pane: 'pane_Indekskritinostiokolia_1',
+      onEachFeature: pop_Indekskritinostiokolia_1,
+      style: style_Indekskritinostiokolia_1_0,
+      smoothFactor: 0
+      });
+
+    var layer_Indekskritinostiokolia_group = L.layerGroup([
+      layer_Indekskritinostiokolia_01,
+      layer_Indekskritinostiokolia_02,
+      layer_Indekskritinostiokolia_03,
+      layer_Indekskritinostiokolia_04,
+      layer_Indekskritinostiokolia_05,
+      layer_Indekskritinostiokolia_06,
+      layer_Indekskritinostiokolia_07,
+      layer_Indekskritinostiokolia_08,
+      layer_Indekskritinostiokolia_09,
+      layer_Indekskritinostiokolia_10,
+      ]);
+    layer_Indekskritinostiokolia_group.addTo(map);
+
+    var overlaysTree = [
+      {label: 'Indeks kritičnosti okoliša',
+      layer: layer_Indekskritinostiokolia_group,
+      },
+      {label: 'Urbani toplinski i zeleni otoci',
+      layer: layer_Urbanitoplinskiizeleniotoci,
+      },
+      {label: 'Kartografska podloga<br>&nbsp;&nbsp;&nbsp;&nbsp;<input id="osm-opacity" type="range" min="0" max="1" step="0.05" value="0.3" style="width:100px;">', layer: Kartografska_podloga},
+      {label: 'Satelitska snimka<br>&nbsp;&nbsp;&nbsp;&nbsp;<input id="esri-opacity" type="range" min="0" max="1" step="0.05" value="0.3" style="width:100px;">', layer: ESRI},
+      ]
+    var lay = L.control.layers.tree(null, overlaysTree,{
+      collapsed: true
+      });
+      lay.addTo(map);
+
+    function bindOpacitySliders() {
+      const osm = document.getElementById('osm-opacity');
+      const esri = document.getElementById('esri-opacity');
+
+      if (osm && !osm._bound) {
+      osm.addEventListener('input', function (e) {
+      e.stopPropagation();
+      Kartografska_podloga.setOpacity(parseFloat(this.value));
+      });
+      L.DomEvent.disableClickPropagation(osm);
+      osm._bound = true;
+      }
+
+      if (esri && !esri._bound) {
+      esri.addEventListener('input', function (e) {
+      e.stopPropagation();
+      ESRI.setOpacity(parseFloat(this.value));
+      });
+      L.DomEvent.disableClickPropagation(esri);
+      esri._bound = true;
+    }
+    }
+
+    bindOpacitySliders();
+    setInterval(bindOpacitySliders, 500);
+
+    const otociFilter = {
+    1: true,
+    2: true,
+    3: true
+    };
+
+    function refreshOtociFilter(){
+      layer_Urbanitoplinskiizeleniotoci.eachLayer(function(layer){
+      const dn = Number(layer.feature.properties.DN);
+      if(otociFilter[dn]){
+      layer.setStyle(
+      style_Urbanitoplinskiizeleniotoci_0_0(layer.feature)
+      );
+      layer.options.interactive = true;
+      if(layer._path) layer._path.style.pointerEvents = "auto";
+      } else {
+      layer.setStyle({
+      fillOpacity:0,
+      opacity:0
+      });
+      layer.options.interactive = false;
+      if(layer._path) layer._path.style.pointerEvents = "none";
+      layer.closePopup();
+      }
+      });
+      }
+
+    const filterLayers = {
+      eci1:  layer_Indekskritinostiokolia_01,
+      eci2:  layer_Indekskritinostiokolia_02,
+      eci3:  layer_Indekskritinostiokolia_03,
+      eci4:  layer_Indekskritinostiokolia_04,
+      eci5:  layer_Indekskritinostiokolia_05,
+      eci6:  layer_Indekskritinostiokolia_06,
+      eci7:  layer_Indekskritinostiokolia_07,
+      eci8:  layer_Indekskritinostiokolia_08,
+      eci9:  layer_Indekskritinostiokolia_09,
+      eci10: layer_Indekskritinostiokolia_10,
+      otoci0: layer_Urbanitoplinskiizeleniotoci,
+      otoci1: layer_Urbanitoplinskiizeleniotoci,
+      otoci2: layer_Urbanitoplinskiizeleniotoci
+      };
+
+    document.querySelectorAll('#filter-panel input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', function () {
+      const key = this.getAttribute('data-layer');
+      if(key.startsWith("eci")){
+      const lyr = filterLayers[key];
+      if (!lyr) return;
+      if (this.checked){
+      if (!map.hasLayer(lyr)) map.addLayer(lyr);
+      } else {
+      if (map.hasLayer(lyr)) map.removeLayer(lyr);
+      }
+      }
+      if(key === "otoci0") otociFilter[1] = this.checked;
+      if(key === "otoci1") otociFilter[2] = this.checked;
+      if(key === "otoci2") otociFilter[3] = this.checked;
+      if(key.startsWith("otoci")){
+      refreshOtociFilter();
+      }
+      });
+      });
+
+    proj4.defs(
+    "EPSG:10329",
+    "+proj=tmerc +lat_0=0 +lon_0=18 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+    );
+
+    proj4.defs(
+    "EPSG:31276",
+    "+proj=tmerc +lat_0=0 +lon_0=18 +k=0.9999 +x_0=6500000 +y_0=0 +ellps=bessel +units=m +no_defs"
+    );
+
+    function toDMS(deg) {
+      const absolute = Math.abs(deg);
+      const degrees = Math.floor(absolute);
+      const minutesFloat = (absolute - degrees) * 60;
+      const minutes = Math.floor(minutesFloat);
+      const seconds = ((minutesFloat - minutes) * 60).toFixed(2);
+      const degreesStr = degrees;
+      const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+      const secondsStr = seconds < 10 ? '0' + seconds : seconds;
+      const sign = deg < 0 ? '-' : '';
+      return `${sign}${degreesStr}° ${minutesStr}' ${secondsStr}''`;
+      }
+
+    const coordsDiv = document.getElementById('koordinate');
+    const izborprojekcije = document.getElementById('izbor-projekcije');
+
+  map.on('mousemove', function (e) {
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+    const selected = izborprojekcije.value;
+
+    if (selected === "wgs84") {
+    const latDMS = toDMS(lat);
+    const lonDMS = toDMS(lon);
+    coordsDiv.textContent = `φ: ${latDMS}, λ: ${lonDMS}`;
+    } else if (selected === "bh_etrs89") {
+    const [easting, northing] =
+    proj4("EPSG:4326", "EPSG:10329", [lon, lat]);
+    coordsDiv.textContent =
+    `E: ${easting.toFixed(2)} m, N: ${northing.toFixed(2)} m`;
+    } else if (selected === "dks1901") {
+    const [easting, northing] =
+    proj4("EPSG:4326", "EPSG:31276", [lon, lat]);
+    coordsDiv.textContent =
+    `y: ${easting.toFixed(2)} m, x: ${northing.toFixed(2)} m`;
+    }
+    });
+ 
+    map.setView([43.3084, 17.8595], 11);
+    </script>        
+  </body>
+</html>
