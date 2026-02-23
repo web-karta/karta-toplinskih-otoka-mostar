@@ -374,6 +374,7 @@
         .leaflet-control.abstractUncollapsed {
         background-color: #f8f9fa !important;
         font-family: 'PT Sans', sans-serif;
+        position: fixed !important;
         font-size: 9pt;
         max-width: 400px;
         max-height: 70vh;
@@ -382,7 +383,7 @@
         border-radius: 10px;
         box-shadow: 0 0 8px rgba(0,0,0,0.4);
         color: black;
-        z-index: 3000 !important;
+        z-index: 7000 !important;
         }
 
         .leaflet-control-layers {
@@ -391,15 +392,42 @@
 
         @media (max-width: 768px) {
         .leaflet-control.abstractUncollapsed {
+        position: fixed !important;
         left: 50% !important;
         right: auto !important;
         transform: translateX(-50%) !important;
         width: calc(100vw - 20px) !important; 
-        max-width: 400px !important;
-        z-index: 3000 !important;
+        max-width: 360px !important;
+        line-height: 1.25 !important;
+        z-index: 9000 !important;
         }
         }
-        
+
+        @media (max-width: 768px) {
+        .leaflet-control.abstractUncollapsed strong {
+        font-size: 13pt !important;
+        }
+        }
+
+        .leaflet-top {
+        z-index: 100 !important;
+        }
+
+        @media (max-width: 768px) {
+
+        .leaflet-control.abstractUncollapsed {
+        font-size: 8pt !important;
+        }
+
+        .leaflet-control.abstractUncollapsed span {
+        font-size: 8pt !important;
+        }
+
+        .leaflet-control.abstractUncollapsed strong {
+        font-size: 13pt !important;
+        }
+        }
+
       </style>
 
       <title>Karta ljetnih temperatura tla na području Grada Mostara</title>
