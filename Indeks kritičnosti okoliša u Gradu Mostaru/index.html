@@ -264,12 +264,24 @@
       border-radius: 10px;
       box-shadow: 0 0 8px rgba(0,0,0,0.4);
       color: black;
+      z-index: 3000 !important;
       }
 
       .leaflet-control-layers {
       box-shadow: none !important;
       }
 
+      @media (max-width: 768px) {
+      .leaflet-control.abstractUncollapsed {
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      width: calc(100vw - 20px) !important; 
+      max-width: 400px !important;
+      z-index: 3000 !important;
+      }
+      }
+      
     </style>
 
     <title>Karta toplinskih i zelenih otoka na području Grada Mostara</title>
