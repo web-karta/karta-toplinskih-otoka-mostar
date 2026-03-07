@@ -346,7 +346,7 @@
   <body>
     <div id="map"></div>
     <div id="kriticnost-legenda" class="kriticnost-legenda">
-      <div class="naslov-legende">Kritičnost okoliša</div>
+      <div class="naslov-legende">Toplinska ugroženost</div>
       <table>
         <tr><td><img src="legend/Indekskritinostiokolia_1_Voda0.png" /></td><td> Voda</td></tr>
         <tr><td><img src="legend/Indekskritinostiokolia_1_Nema1.png" /></td><td> Nema (urbani zeleni otok)</td></tr>
@@ -361,9 +361,9 @@
       </table>
     </div>
 
-    <div class="temp" id="tempIcon" title="Prikaži razine kritičnosti okoliša">
+    <div class="temp" id="tempIcon" title="Prikaži razine kritičnosti okoliša/toplinske ugroženosti">
     <i class="fas fa-thermometer-half"></i></div>
-    <div class="filter-gumb" id="filterIcon" title="Odaberi razine kritičnosti okoliša">
+    <div class="filter-gumb" id="filterIcon" title="Odaberi razine kritičnosti okoliša/toplinske ugroženosti">
     <i class="fas fa-filter"></i></div>
     <div id="filter-panel">
     <h4>Indeks kritičnosti okoliša</h4>
@@ -506,7 +506,7 @@
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
       + 'Ova web-karta izrađena je u sklopu rada \'\'Određivanje, kartiranje i analiza toplinskih otoka urbanog područja Grada Mostara primjenom satelitskih snimki\'\'.</span>'
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">' 
-      + 'Karta prikazuje prostorno protezanje urbanih toplinskih i zelenih otoka, kao i područja grada (naselje Mostar i prigradska naselja) s razinama kritičnosti okoliša, od područja s vegetacijom (nema kritičnosti okoliša, urbani zeleni otoci) do područja s visokom izgrađenošću (ozbiljna kritičnost okoliša, urbani toplinski otoci). Prikaz je nastao usrednjavanjem ljetnih indeksa kritičnosti okoliša u razdoblju od 2021. do 2025.'
+      + 'Karta prikazuje prostorno protezanje urbanih toplinskih i zelenih otoka, kao i područja grada (naselje Mostar i prigradska naselja) s razinama kritičnosti okoliša/toplinske ugroženosti, od područja s vegetacijom (nema kritičnosti okoliša, urbani zeleni otoci) do područja s visokom izgrađenošću (ozbiljna kritičnost okoliša, urbani toplinski otoci). Prikaz je nastao usrednjavanjem ljetnih indeksa kritičnosti okoliša u razdoblju od 2021. do 2025.'
       + '<span style="font-family: \'PT Sans\', sans-serif; font-size: 10.5pt; text-align: justify; display: block;">'
       + '</span><br>'
       + '<strong style="font-size: 10pt; font-family: \'PT Sans\', sans-serif;">Kartografska projekcija:</strong><br />'
@@ -583,7 +583,6 @@
       };
       }
 
-  // fallback (VAŽNO)
   return {
     pane: 'pane_Urbanitoplinskiizeleniotoci_0',
     color: 'rgba(0,0,0,0)',
@@ -608,15 +607,63 @@
 
 layer_Urbanitoplinskiizeleniotoci.addTo(map);
 
-    function pop_Indekskritinostiokolia_1(feature, layer) {
-      var popupContent = '<table>\
-      <tr>\
-      <td colspan="2"><strong>Kritičnost okoliša</strong><br />' + (feature.properties['ECI'] !== null ? autolinker.link(String(feature.properties['ECI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-      </tr>\
-      </table>';
-      var content = popupContent;
-			layer.bindPopup(content, { maxHeight: 400 });
-      }
+function pop_Indekskritinostiokolia_1(feature, layer) {
+
+  let eci = feature.properties['ECI'];
+  let poruka = "";
+
+  if (eci === "Voda") {
+    poruka = "Područje bez toplinske ugroženosti.";
+  }
+
+  if (eci === "Nema") {
+    poruka = "Područje bez toplinske ugroženosti. Vegetacija i vodene površine omogućuju učinkovito hlađenje okoliša te stvaraju ugodnije uvjete.";
+  }
+
+  if (eci === "Jako niska") {
+    poruka = "Područje s vrlo niskom toplinskom ugroženošću. Dominiraju vegetacija i prirodne površine koje smanjuju zagrijavanje tla.";
+  }
+
+  if (eci === "Niska") {
+    poruka = "Područje s niskom toplinskom ugroženošću. Temperatura površine obično je umjerenija zahvaljujući prisutnosti vegetacije ili manjeg stupnja izgrađenosti.";
+  }
+
+  if (eci === "Umjereno niska") {
+    poruka = "Područje s umjereno niskom toplinskom ugroženošću. Površine se zagrijavaju nešto više nego u vegetacijskim područjima, ali toplinski učinak i dalje je relativno slab.";
+  }
+
+  if (eci === "Umjerena") {
+    poruka = "Područje s umjerenom toplinskom ugroženošću. Zagrijavanje površine izraženije je zbog većeg udjela izgrađenih površina.";
+  }
+
+  if (eci === "Umjereno visoka") {
+    poruka = "Područje s umjereno visokom toplinskom ugroženošću. Zagrijavanje površine izraženije je zbog većeg udjela izgrađenih površina.";
+  }
+
+  if (eci === "Visoka") {
+    poruka = "Područje s visokom toplinskom ugroženošću. Izgrađene površine znatno se zagrijavaju te dolazi do povišenih temperatura, štetnih za zdravlje.";
+  }
+
+  if (eci === "Jako visoka") {
+    poruka = "Područje s vrlo izraženim zagrijavanjem površine. Izgrađene površine znatno se zagrijavaju te dolazi do povišenih temperatura, štetnih za zdravlje.";
+  }
+
+  if (eci === "Ozbiljna") {
+    poruka = "Područje urbanog toplinskog otoka s izrazito povišenim temperaturama površine. Izgrađene površine jako su zagrijane te visoka temperatura štetno utječe na zdravlje te je potrebno izbjegavati ova područja.";
+  }
+
+  var popupContent =
+  '<table>\
+  <tr>\
+  <td colspan="2"><strong>Toplinska ugroženost</strong><br />' + eci + '</td>\
+  </tr>\
+  <tr>\
+  <td colspan="2"><strong>Pojašnjenje</strong><br />' + poruka + '</td>\
+  </tr>\
+  </table>';
+
+  layer.bindPopup(popupContent, { maxHeight: 400 });
+}
 
     function style_Indekskritinostiokolia_1_0(feature) {
       switch(String(feature.properties['DN'])) {
